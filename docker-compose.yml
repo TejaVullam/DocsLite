@@ -1,0 +1,38 @@
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: docslite-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: docslite
+      POSTGRES_USER: docslite_user
+      POSTGRES_PASSWORD: docslite_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U docslite_user -d docslite"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: docslite-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
